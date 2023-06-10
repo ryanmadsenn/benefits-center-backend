@@ -13,7 +13,7 @@ const typeDefs = readFileSync("./schema.graphql", "utf-8");
 const db = await connectDB();
 
 const corsOptions = {
-  origin: [process.env.BASE_URL, "https://studio.apollographql.com"],
+  origin: [process.env.BASE_URL as string, "https://studio.apollographql.com"],
   allowedHeaders: "*",
 };
 
