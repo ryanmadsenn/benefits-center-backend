@@ -47,7 +47,8 @@ export const resolvers: Resolvers = {
       if (!response) throw new Error("Could not get financial service form.");
       return response as FinancialServiceForm;
     },
-    getAgents: async (_, __, { dataSources: { db } }) => {
+    getAgents: async (_, __, { dataSources: { db }, isAuthenticated }) => {
+      if (!isAuthenticated) throw new Error("Not authorized.");
       if (!db) throw new Error("Could not connect to database.");
       const response = (await db
         .collection("agents")
@@ -56,7 +57,8 @@ export const resolvers: Resolvers = {
       if (!response) throw new Error("Could not get agents.");
       return response as Agent[];
     },
-    getAgent: async (_, { id }, { dataSources: { db } }) => {
+    getAgent: async (_, { id }, { dataSources: { db }, isAuthenticated }) => {
+      if (!isAuthenticated) throw new Error("Not authorized.");
       if (!id) throw new Error("No agent id.");
       if (!db) throw new Error("Could not connect to database.");
       const response = (await db
@@ -166,7 +168,12 @@ export const resolvers: Resolvers = {
         message: "Successfully deleted financial service form.",
       };
     },
-    insertAgent: async (_, { agentInput }, { dataSources: { db } }) => {
+    insertAgent: async (
+      _,
+      { agentInput },
+      { dataSources: { db }, isAuthenticated }
+    ) => {
+      if (!isAuthenticated) throw new Error("Not authorized.");
       if (!agentInput) throw new Error("No agent input provided.");
       if (!db) throw new Error("Could not connect to database.");
       const response = await db.collection("agents").insertOne(agentInput);
@@ -177,7 +184,12 @@ export const resolvers: Resolvers = {
         id: response.insertedId.toString(),
       };
     },
-    updateAgent: async (_, { id, agentInput }, { dataSources: { db } }) => {
+    updateAgent: async (
+      _,
+      { id, agentInput },
+      { dataSources: { db }, isAuthenticated }
+    ) => {
+      if (!isAuthenticated) throw new Error("Not authorized.");
       if (!id) throw new Error("No agent ID provided.");
       if (!agentInput) throw new Error("No agent input provided.");
       if (!db) throw new Error("Could not connect to database.");
@@ -190,7 +202,12 @@ export const resolvers: Resolvers = {
         message: "Successfully updated agent.",
       };
     },
-    deleteAgent: async (_, { id }, { dataSources: { db } }) => {
+    deleteAgent: async (
+      _,
+      { id },
+      { dataSources: { db }, isAuthenticated }
+    ) => {
+      if (!isAuthenticated) throw new Error("Not authorized.");
       if (!id) throw new Error("No agent ID provided.");
       if (!db) throw new Error("Could not connect to database.");
       const response = await db
