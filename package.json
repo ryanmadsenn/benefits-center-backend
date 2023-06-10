@@ -13,6 +13,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "@apollo/sandbox": "^2.4.0",
     "@apollo/server": "^4.7.1",
     "@babel/core": "^7.0.0-0",
     "@types/cors": "^2.8.13",

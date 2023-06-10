@@ -12,11 +12,6 @@ import { connectDB } from "./connect.js";
 const typeDefs = readFileSync("./schema.graphql", "utf-8");
 const db = await connectDB();
 
-const corsOptions = {
-  origin: [process.env.BASE_URL as string, "https://studio.apollographql.com"],
-  allowedHeaders: "*",
-};
-
 export interface Context {
   dataSources: {
     db: Db;
@@ -51,7 +46,7 @@ app.get("/", (req, res) => {
 
 app.use(
   "/graphql",
-  cors<cors.CorsRequest>(corsOptions),
+  cors<cors.CorsRequest>(),
   json(),
   expressMiddleware(server, {
     context: async ({ req }) => {
