@@ -9,14 +9,13 @@ import { readFileSync } from "fs";
 import { resolvers } from "./resolvers.js";
 import { Db } from "mongodb";
 import { connectDB } from "./connect.js";
-import authConfig from "./auth_config.json" assert { type: "json" };
 
 const typeDefs = readFileSync("./schema.graphql", "utf-8");
 const db = await connectDB();
 
 const verifyJWT = auth({
-  audience: authConfig.audience as string,
-  issuerBaseURL: `https://${authConfig.domain as string}`,
+  audience: process.env.AUTH0_AUDIENCE as string,
+  issuerBaseURL: process.env.AUTH0_DOMAIN as string,
 });
 export interface Context {
   dataSources: {
