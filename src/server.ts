@@ -4,14 +4,20 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import express, { json } from "express";
 import http from "http";
 import cors from "cors";
-import { auth } from "express-openid-connect";
+import { auth } from "express-oauth2-jwt-bearer";
 import { readFileSync } from "fs";
 import { resolvers } from "./resolvers.js";
 import { Db } from "mongodb";
 import { connectDB } from "./connect.js";
+import authConfig from "./auth_config.json" assert { type: "json" };
+
 const typeDefs = readFileSync("./schema.graphql", "utf-8");
 const db = await connectDB();
 
+const verifyJWT = auth({
+  audience: authConfig.audience as string,
+  issuerBaseURL: `https://${authConfig.domain as string}`,
+});
 export interface Context {
   dataSources: {
     db: Db;
@@ -29,30 +35,23 @@ const server = new ApolloServer<Context>({
 });
 await server.start();
 
-const auth0config = {
-  authRequired: false,
-  auth0Logout: true,
-  secret: process.env.AUTH0_SECRET,
-  baseURL: process.env.BASE_URL,
-  clientID: process.env.AUTH0_CLIENT_ID,
-  issuerBaseURL: process.env.AUTH0_DOMAIN,
-};
-
-app.use(auth(auth0config));
-
-app.get("/", (req, res) => {
-  res.sendFile("index.html", { root: "./public" });
-});
-
 app.use(
   "/graphql",
   cors<cors.CorsRequest>(),
   json(),
   expressMiddleware(server, {
-    context: async ({ req }) => {
+    context: async ({ req, res }) => {
+      await verifyJWT(req, res, (err) => {
+        if (err) {
+          console.error(err);
+        }
+      });
+
       return {
-        dataSources: { db },
-        isAuthenticated: req.oidc.isAuthenticated(),
+        dataSources: {
+          db,
+        },
+        isAuthenticated: !!req.auth,
       };
     },
   })
